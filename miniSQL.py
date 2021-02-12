@@ -17,6 +17,7 @@ from pyparsing import (
 )
 
 from database import Database
+from smallRelationsInsertFile import db
 
 selectStmt = Forward()
 
@@ -24,10 +25,8 @@ SELECT, FROM, WHERE = map(CaselessKeyword, "select from where".split())
 
 ident = Word(alphas,alphanums + "_$").setName("identifier")
 columnName = delimitedList(ident, ".", combine=True).setName("column name")
-columnName.addParseAction(ppc.upcaseTokens)
 columnNameList = Group(delimitedList(columnName))
 tableName = delimitedList(ident, ".", combine=True).setName("table name")
-tableName.addParseAction(ppc.upcaseTokens)
 tableNameList = Group(delimitedList(tableName))
 
 binop = oneOf("< <= == >= >")
@@ -53,14 +52,10 @@ selectStmt <<= (
 simpleSQL = selectStmt
 
 if __name__ == "__main__":
-    simpleSQL.runTests(
-        """\
-        # multiple tables
-        SELECT * from XYZZY, ABC
-        
-        # multiple tables
-        SELECT A from ABC WHERE A.ABC == 3
-        
-        """
-        )
+    db.show_table("student")
+    select = simpleSQL.parseString("Select name, ID from student where name==Zhang")
+    print(select)
+    where = select[4][1][0] + select[4][1][1] + select[4][1][2]
+    db.select(select[3][0],select[1],where)
     
+       

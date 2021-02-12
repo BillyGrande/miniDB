@@ -2,3 +2,5 @@ dbdata/
 __pycache__/
 Pipfile
 Pipfile.lock
+.project
+.pydevproject
