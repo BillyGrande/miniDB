@@ -13,7 +13,7 @@ createStmt = Forward()
 keywords = {
     k: CaselessKeyword(k)
     for k in """\
-    SELECT FROM WHERE UPDATE SET
+    SELECT FROM WHERE UPDATE SET INSERT INTO
     """.split()
     }
 vars().update(keywords)
@@ -53,6 +53,8 @@ whereConditionSet = Group(ident + binop + setColumnVal)
 
 setCondition = Group(ident + "=" + setColumnVal)
 
+insertRow = Suppress("(") + Group(delimitedList(setColumnVal)) + Suppress(")")
+
 selectStmt <<= (
     SELECT 
     + ("*" | columnNameList)("columns")
@@ -63,11 +65,20 @@ selectStmt <<= (
 
 #UPDATE Customers SET name = 'Alfred' WHERE ID == 1;
 updateStmt <<= (UPDATE 
-                + ident("table")
+                + tableName("table")
                 + SET 
                 + setCondition("column") 
                 + (WHERE + whereConditionSet)("where")
                 )
+
+#INSERT INTO student (00128, Zhang', 'Comp. Sci.', '102');
+insertStmt <<= (
+    INSERT 
+    + INTO
+    + tableName("table")
+    + insertRow("row")
+    )
+
 
 queries = {
     "SELECT" : selectStmt,
@@ -81,6 +92,7 @@ miniSQL = selectStmt
 
 updateSQL = updateStmt
 selectSQL = selectStmt
+insertSQL = insertStmt
 
 if __name__ == "__main__":
     
@@ -100,6 +112,18 @@ if __name__ == "__main__":
         print(miniSQL.parseString(selectTest))
     except KeyError:
         print("Invalids Start Of Statement")
+        
+    insertSQL.runTests(
+        """\
+        
+        #Insert normal statement
+        INSERT INTO student (00128, "Zhang", "Comp. Sci.", "102")
+        
+        #FAIL not parenthesis
+        INSERT INTO student (00128, "Zhang", "Comp. Sci.", "102"
+        
+        """
+        )
         
     updateSQL.runTests(
         """\
