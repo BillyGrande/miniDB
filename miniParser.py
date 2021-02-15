@@ -4,16 +4,19 @@ from database import Database
 from smallRelationsInsertFile import db
 
 
+
 selectStmt = Forward()
 updateStmt = Forward()
 insertStmt = Forward()
 deleteStmt = Forward()
 createStmt = Forward()
+dropStmt = Forward()
 
 keywords = {
     k: CaselessKeyword(k)
     for k in """\
-    SELECT FROM WHERE UPDATE SET INSERT INTO
+    SELECT FROM WHERE UPDATE SET INSERT INTO DELETE
+    DROP TABLE
     """.split()
     }
 vars().update(keywords)
@@ -79,13 +82,28 @@ insertStmt <<= (
     + insertRow("row")
     )
 
+#DELETE FROM Customers WHERE CustomerName='Alfreds Futterkiste';
+deleteStmt <<= (
+    DELETE 
+    + FROM
+    + tableName("table")
+    + (WHERE + whereConditionSet)("where")
+    )
+
+#DROP TABLE student
+dropStmt <<= (
+    DROP
+    + TABLE 
+    + tableName("table")
+    )
 
 queries = {
     "SELECT" : selectStmt,
     "UPDATE": updateStmt,
     "INSERT": insertStmt,
     "DELETE": deleteStmt,
-    "CREATE": createStmt}
+    "CREATE": createStmt,
+    "DROP": dropStmt}
 
 simpleSQL = selectStmt
 miniSQL = selectStmt
@@ -93,6 +111,8 @@ miniSQL = selectStmt
 updateSQL = updateStmt
 selectSQL = selectStmt
 insertSQL = insertStmt
+deleteSQL = deleteStmt
+dropSQL = dropStmt
 
 if __name__ == "__main__":
     
@@ -113,6 +133,34 @@ if __name__ == "__main__":
     except KeyError:
         print("Invalids Start Of Statement")
         
+    dropSQL.runTests(
+        """\
+        #Should work
+        DROP TABLE student
+        
+        #FAIL
+        DROP TABLE student where help==3
+        
+        """)
+        
+    deleteSQL.runTests(
+        """\
+        #Delete normal statement
+        DELETE FROM student WHERE name=="Zhang@"
+        
+        #Delete normal statement
+        DELETE FROM student WHERE ID==1
+        
+        #Fail
+        DELETE FROM student WHERE name==Zhang@
+        
+        #Fail
+        DELETE FROM student WHERE name="Zhang@"
+        
+        
+        
+        """)
+    
     insertSQL.runTests(
         """\
         
