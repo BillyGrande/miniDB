@@ -16,7 +16,7 @@ keywords = {
     k: CaselessKeyword(k)
     for k in """\
     SELECT FROM WHERE UPDATE SET INSERT INTO DELETE
-    DROP TABLE
+    DROP TABLE CREATE INDEX DATABASE
     """.split()
     }
 vars().update(keywords)
@@ -30,9 +30,12 @@ columnNameList = Group(delimitedList(columnName))
 tableName = delimitedList(ident, ".", combine=True).setName("table name")
 tableNameList = Group(delimitedList(tableName))
 
+
+dataTypes = oneOf("str int float complex")
 binop = oneOf("< <= == >= >")
 realNum = pyparsing_common.real()
 intNum = pyparsing_common.signed_integer()
+newTable = ident + dataTypes
 
 #stringVal = Word(alphanums)
 
@@ -46,6 +49,7 @@ setColumnVal = (
     realNum | intNum | QuotedString('"')
     )
 
+
 #for select
 whereCondition = Group(columnName + binop + columnRval)
 
@@ -57,6 +61,8 @@ whereConditionSet = Group(ident + binop + setColumnVal)
 setCondition = Group(ident + "=" + setColumnVal)
 
 insertRow = Suppress("(") + Group(delimitedList(setColumnVal)) + Suppress(")")
+
+createRow =  Suppress("(") + Group(delimitedList(newTable)) + Suppress(")")
 
 selectStmt <<= (
     SELECT 
@@ -90,6 +96,16 @@ deleteStmt <<= (
     + (WHERE + whereConditionSet)("where")
     )
 
+#Create
+createStmt <<=(
+    CREATE 
+    + 
+    ((DATABASE + ident)
+    | (TABLE + ident + createRow)
+    | INDEX
+    ))
+
+
 #DROP TABLE student
 dropStmt <<= (
     DROP
@@ -113,6 +129,7 @@ selectSQL = selectStmt
 insertSQL = insertStmt
 deleteSQL = deleteStmt
 dropSQL = dropStmt
+createSQL = createStmt
 
 if __name__ == "__main__":
     
@@ -133,6 +150,20 @@ if __name__ == "__main__":
     except KeyError:
         print("Invalids Start Of Statement")
         
+    createSQL.runTests(
+        """\
+        #Create database
+        Create database NewSchema
+        
+        #Create table
+        CREATE TABLE Student ( ID int, Name str)
+        
+        #Create table
+        CREATE TABLE Student ( ID int, Name lol)
+        
+        
+        """)
+    
     dropSQL.runTests(
         """\
         #Should work
