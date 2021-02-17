@@ -16,7 +16,7 @@ keywords = {
     k: CaselessKeyword(k)
     for k in """\
     SELECT FROM WHERE UPDATE SET INSERT INTO DELETE
-    DROP TABLE CREATE INDEX DATABASE ON
+    DROP TABLE CREATE INDEX DATABASE ON INNER JOIN
     """.split()
     }
 vars().update(keywords)
@@ -56,6 +56,8 @@ whereCondition = Group(columnName + binop + columnRval)
 #for update
 whereConditionSet = Group(ident + binop + setColumnVal)
 
+joinCondition = columnName + binop + columnName
+
 #whereExpression = infixNotation(whereCondition, [("==",1,opAssoc.RIGHT)],)
 
 setCondition = Group(ident + "=" + setColumnVal)
@@ -71,6 +73,7 @@ selectStmt <<= (
     + ("*" | columnNameList)("columns")
     + FROM
     + tableNameList("tables")
+    + Optional(INNER + JOIN + tableName + ON + joinCondition)
     + Optional(Group(WHERE + whereCondition), "")("where")
     )
 
@@ -111,9 +114,11 @@ createStmt <<=(
 #DROP TABLE student
 dropStmt <<= (
     DROP
-    + TABLE 
-    + tableName("table")
-    )
+    + 
+    ((DATABASE + ident)
+    | (TABLE + tableName("table"))
+    | (INDEX + ident)
+    ))
 
 queries = {
     "SELECT" : selectStmt,
@@ -259,6 +264,11 @@ if __name__ == "__main__":
         # FAIL - invalid column
         Select &&& frox Sys.dual
         
+        # Inner Join
+        Select BurgerCode.Mac, Names.Burgers, Price.Burgers from Mac INNER JOIN Burgers ON Names.Burgers == BurgerCode.Mac 
+        
+        #Select Complete
+        Select BurgerCode.Mac, Names.Burgers, Price.Burgers from Mac INNER JOIN Burgers ON Names.Burgers == BurgerCode.Mac WHERE Price.Burgers > 3
         """
         )
        
