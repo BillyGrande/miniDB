@@ -16,7 +16,7 @@ keywords = {
     k: CaselessKeyword(k)
     for k in """\
     SELECT FROM WHERE UPDATE SET INSERT INTO DELETE
-    DROP TABLE CREATE INDEX DATABASE
+    DROP TABLE CREATE INDEX DATABASE ON
     """.split()
     }
 vars().update(keywords)
@@ -64,6 +64,8 @@ insertRow = Suppress("(") + Group(delimitedList(setColumnVal)) + Suppress(")")
 
 createRow =  Suppress("(") + Group(delimitedList(newTable)) + Suppress(")")
 
+indexRow = ident + Suppress("(") + Group(delimitedList(ident)) +Suppress(")")
+
 selectStmt <<= (
     SELECT 
     + ("*" | columnNameList)("columns")
@@ -102,7 +104,7 @@ createStmt <<=(
     + 
     ((DATABASE + ident)
     | (TABLE + ident + createRow)
-    | INDEX
+    | (INDEX + ident + ON + indexRow)
     ))
 
 
@@ -161,6 +163,8 @@ if __name__ == "__main__":
         #Create table
         CREATE TABLE Student ( ID int, Name lol)
         
+        #Create index
+        CREATE INDEX id_3 ON Stundet(ID)
         
         """)
     
