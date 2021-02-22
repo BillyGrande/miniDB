@@ -73,7 +73,7 @@ selectStmt <<= (
     + ("*" | columnNameList)("columns")
     + FROM
     + tableNameList("tables")
-    + Optional(INNER + JOIN + tableName + ON + joinCondition)
+    + Optional(Group(INNER + JOIN + tableName + ON + joinCondition))("inner join")
     + Optional(Group(WHERE + whereCondition), "")("where")
     )
 
@@ -120,7 +120,7 @@ dropStmt <<= (
     | (INDEX + ident)
     ))
 
-queries = {
+miniParsers = {
     "SELECT" : selectStmt,
     "UPDATE": updateStmt,
     "INSERT": insertStmt,
@@ -143,16 +143,16 @@ if __name__ == "__main__":
     updateTest = "UPDATE A"
     selectTest = "SELECT * from XYZYY, ABC"
     try:
-        miniSQL = queries[updateTest.split()[0]]
+        miniSQL = miniParsers[updateTest.split()[0]]
         print(miniSQL.parseString(updateTest))
     
-        miniSQL = queries[selectTest.split()[0]]
+        miniSQL = miniParsers[selectTest.split()[0]]
         print(miniSQL.parseString(selectTest))
     except:
         print("Fail")
         
     try:
-        miniSQL = queries["choco"]
+        miniSQL = miniParsers["choco"]
         print(miniSQL.parseString(selectTest))
     except KeyError:
         print("Invalids Start Of Statement")
