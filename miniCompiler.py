@@ -72,15 +72,46 @@ class Compiler:
                 
     def parsing(self, query, parser):
         result = parser.parseString(query)
-        print(result)
-        print(result[0])
-        self.selectStm(result)
+        functionName = result[0].lower() + "Stm"
+        
+        #One liner code to call the appropriate database function
+        getattr(self, functionName)(result)
         
     def selectStm(self,parsedText):
         columns = parsedText[1]
         table = parsedText[3][0]
+        condition = None
+        print(parsedText)
         
-        self.db.select(table,columns)
+        try:
+            lastToken = parsedText[4][0].lower() 
+            if lastToken == "where":
+                condition = "".join(parsedText[4][1])
+                print(condition)
+            elif lastToken == "inner":
+                pass
+                return None
+        except IndexError:
+            pass
+        
+        self.db.select(table,columns,condition)
+        
+    def updateStm(self,parsedText):
+        pass
+    
+    def insertStm(self,parsedText):
+        pass
+    
+    def deleteStm(self,parsedText):
+        pass
+    
+    def createStm(self,parsedText):
+        pass
+    
+    def dropStm(self,parsedText):
+        pass
+    
+    
 
 if __name__ == "__main__":
     

@@ -17,6 +17,7 @@ keywords = {
     for k in """\
     SELECT FROM WHERE UPDATE SET INSERT INTO DELETE
     DROP TABLE CREATE INDEX DATABASE ON INNER JOIN
+    ORDER BY
     """.split()
     }
 vars().update(keywords)
@@ -44,6 +45,8 @@ columnRval = (
     realNum | intNum | columnName | QuotedString('"')
     )
 
+columnR2 = (Word(alphanums) | QuotedString('"'))
+
 #for update
 setColumnVal = (
     realNum | intNum | QuotedString('"')
@@ -51,7 +54,7 @@ setColumnVal = (
 
 
 #for select
-whereCondition = Group(columnName + binop + columnRval)
+whereCondition = Group(columnName + binop + columnR2)
 
 #for update
 whereConditionSet = Group(ident + binop + setColumnVal)
@@ -74,7 +77,8 @@ selectStmt <<= (
     + FROM
     + tableNameList("tables")
     + Optional(Group(INNER + JOIN + tableName + ON + joinCondition))("inner join")
-    + Optional(Group(WHERE + whereCondition), "")("where")
+    + Optional(Group(WHERE + whereCondition))("where")
+    + Optional(Group(ORDER + BY + columnName))("order")
     )
 
 #UPDATE Customers SET name = 'Alfred' WHERE ID == 1;
@@ -269,6 +273,10 @@ if __name__ == "__main__":
         
         #Select Complete
         Select BurgerCode.Mac, Names.Burgers, Price.Burgers from Mac INNER JOIN Burgers ON Names.Burgers == BurgerCode.Mac WHERE Price.Burgers > 3
+        
+        #Select Order
+        Select BurgerCode.Mac, Names.Burgers, Price.Burgers from Mac INNER JOIN Burgers ON Names.Burgers == BurgerCode.Mac WHERE Price.Burgers > 3 ORDER BY BurgerCode
         """
+        
         )
        
