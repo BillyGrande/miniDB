@@ -187,23 +187,7 @@ if __name__ == "__main__":
         
         """)
         
-    deleteSQL.runTests(
-        """\
-        #Delete normal statement
-        DELETE FROM student WHERE name=="Zhang@"
-        
-        #Delete normal statement
-        DELETE FROM student WHERE ID==1
-        
-        #Fail
-        DELETE FROM student WHERE name==Zhang@
-        
-        #Fail
-        DELETE FROM student WHERE name="Zhang@"
-        
-        
-        
-        """)
+    
     
     insertSQL.runTests(
         """\
@@ -281,3 +265,20 @@ if __name__ == "__main__":
         """
         )
        
+       
+    deleteSQL.runTests(
+        """\
+        
+        #Delete normal statement
+        DELETE FROM student WHERE name=="Zhang@"
+        
+        #Delete normal statement
+        DELETE FROM student WHERE ID==1
+        
+        #Fail
+        DELETE FROM student WHERE name==Zhang@
+        
+        #Fail
+        DELETE FROM student WHERE name="Zhang@"
+        
+        """)

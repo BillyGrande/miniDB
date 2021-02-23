@@ -103,12 +103,17 @@ class Compiler:
         condition = "".join(parsedText[5])
         self.db.update(table, set_value, set_column, condition)
         
-    
+    #def insert(self, table_name, row, lock_load_save=True):
     def insertStm(self,parsedText):
-        pass
+        table = parsedText[2]
+        row = parsedText[3]
+        self.db.insert(table,row)
     
+    #['DELETE', 'FROM', 'student', 'WHERE', ['name', '==', 'Zhang@']]
     def deleteStm(self,parsedText):
-        pass
+        table = parsedText[2]
+        condition = "".join(parsedText[4])
+        self.db.delete(table,condition)
     
     def createStm(self,parsedText):
         pass
