@@ -49,7 +49,7 @@ columnR2 = (Word(alphanums) | QuotedString('"'))
 
 #for update
 setColumnVal = (
-    realNum | intNum | QuotedString('"')
+    realNum | Word(alphanums) | QuotedString('"')
     )
 
 
@@ -217,23 +217,6 @@ if __name__ == "__main__":
         """
         )
         
-    updateSQL.runTests(
-        """\
-        
-        #update normal statement
-        UPDATE student SET name="Zhang@" where ID == 1
-        
-        #fail not in string quotes
-        UPDATE student SET name=Zhang where ID == 1
-        
-        #fail not in string quotes
-        UPDATE student SET name="Zhang" where ID == coffee
-        
-        #fail not in string quotes
-        UPDATE student SET name="Zhang" where ID == "1"
-        
-        """
-        )
         
     selectSQL.runTests(
         """\
@@ -278,5 +261,23 @@ if __name__ == "__main__":
         Select BurgerCode.Mac, Names.Burgers, Price.Burgers from Mac INNER JOIN Burgers ON Names.Burgers == BurgerCode.Mac WHERE Price.Burgers > 3 ORDER BY BurgerCode
         """
         
+        )
+    
+    updateSQL.runTests(
+        """\
+        
+        #update normal statement
+        UPDATE student SET name="Zhang@" where ID == 1
+        
+        #fail not in string quotes
+        UPDATE student SET name=Zhang where ID == 1
+        
+        #fail not in string quotes
+        UPDATE student SET name="Zhang" where ID == coffee
+        
+        #fail not in string quotes
+        UPDATE student SET name="Zhang" where ID == "1"
+        
+        """
         )
        

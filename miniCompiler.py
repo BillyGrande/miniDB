@@ -97,7 +97,12 @@ class Compiler:
         self.db.select(table,columns,condition)
         
     def updateStm(self,parsedText):
-        pass
+        table = parsedText[1]
+        set_value = parsedText[3][2]
+        set_column = parsedText[3][0]
+        condition = "".join(parsedText[5])
+        self.db.update(table, set_value, set_column, condition)
+        
     
     def insertStm(self,parsedText):
         pass
@@ -116,4 +121,5 @@ class Compiler:
 if __name__ == "__main__":
     
     comp = Compiler(db)
+    comp2 = Compiler(db)
     
