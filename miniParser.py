@@ -45,16 +45,21 @@ columnRval = (
     realNum | intNum | columnName | QuotedString('"')
     )
 
-columnR2 = (Word(alphanums) | QuotedString('"'))
+columnRval = (
+    Word(alphanums) | columnName | QuotedString('"')
+    )
 
 #for update
 setColumnVal = (
-    realNum | Word(alphanums) | QuotedString('"')
+    intNum | realNum | QuotedString('"')
     )
 
+setColumnVal = (
+    Word(alphanums) | QuotedString('"')
+    )
 
 #for select
-whereCondition = Group(columnName + binop + columnR2)
+whereCondition = Group(columnName + binop + columnRval)
 
 #for update
 whereConditionSet = Group(ident + binop + setColumnVal)
@@ -111,7 +116,7 @@ createStmt <<=(
     + 
     ((DATABASE + ident)
     | (TABLE + ident + createRow)
-    | (INDEX + ident + ON + indexRow)
+    | (INDEX + ident + ON + ident)
     ))
 
 
@@ -160,22 +165,6 @@ if __name__ == "__main__":
         print(miniSQL.parseString(selectTest))
     except KeyError:
         print("Invalids Start Of Statement")
-        
-    createSQL.runTests(
-        """\
-        #Create database
-        Create database NewSchema
-        
-        #Create table
-        CREATE TABLE Student ( ID int, Name str)
-        
-        #Create table
-        CREATE TABLE Student ( ID int, Name lol)
-        
-        #Create index
-        CREATE INDEX id_3 ON Stundet(ID)
-        
-        """)
     
     dropSQL.runTests(
         """\
@@ -280,5 +269,21 @@ if __name__ == "__main__":
         
         #Fail
         DELETE FROM student WHERE name="Zhang@"
+        
+        """)
+    
+    createSQL.runTests(
+        """\
+        #Create database
+        Create database NewSchema
+        
+        #Create table
+        CREATE TABLE Student ( ID int, Name str)
+        
+        #Create table
+        CREATE TABLE Student ( ID int, Name lol)
+        
+        #Create index
+        CREATE INDEX id_3 ON Stundet(ID)
         
         """)

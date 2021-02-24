@@ -35,6 +35,12 @@ print("Welcome to Mini Compiler. A sql-like compiler for miniDB framework made f
 
 class Compiler:
     
+    data_types = {
+        "int": int,
+        "float": float,
+        "str": str,
+        "complex": complex
+        }
     
     def __init__(self, database=None):
         self.db = database
@@ -110,21 +116,73 @@ class Compiler:
         self.db.insert(table,row)
     
     #['DELETE', 'FROM', 'student', 'WHERE', ['name', '==', 'Zhang@']]
+    #Delete From student WHERE name=="Zhang";
     def deleteStm(self,parsedText):
         table = parsedText[2]
         condition = "".join(parsedText[4])
         self.db.delete(table,condition)
     
     def createStm(self,parsedText):
-        pass
+        functionName = "create_" + parsedText[1].lower()
+        getattr(self, functionName)(parsedText)
+        
+    def create_database(self,parsedText):
+        name = parsedText[2]
+        self.db = Database(name)
+    
+    def create_index(self,parsedText):
+        index_name = parsedText[2]
+        table = parsedText[4]
+        self.db.create_index(table,index_name)
+    
+    def create_table(self, parsedText):
+        if len(parsedText[3]) % 2 == 0:
+            unpacked_list = self._unpack_list(parsedText[3])
+            table_name = parsedText[2]
+            column_names = unpacked_list[0]
+            column_types = unpacked_list[1]
+            self.db.create_table(table_name,column_names,column_types)
+        
+        
+    
+    def _unpack_list(self,columns):
+        unpacked_list = []
+        column_names = []
+        column_types = []
+        column_number = len(columns)
+        
+        for i in range(0,column_number):
+            if i % 2:
+                column_types.append(Compiler.data_types[columns[i]])
+            else:
+                column_names.append(columns[i])
+        
+        unpacked_list.append(column_names)
+        unpacked_list.append(column_types)
+        print(unpacked_list)
+        return unpacked_list
+                    
     
     def dropStm(self,parsedText):
+        functionName = "drop_" + parsedText[1].lower()
+        getattr(self, functionName)(parsedText)
+    
+    def drop_database(self,parsedText):
+        database = parsedText[2]
+        tmp = db
+        del tmp
+    
+    def drop_table(self,parsedText):
+        table = parsedText[2]
+        db.drop_table(table)
+    
+    def drop_index(self,parsedText):
         pass
-    
-    
 
 if __name__ == "__main__":
     
+    #db.drop_table("KingKong")
+    comp1 = Compiler(db)
     comp = Compiler(db)
     comp2 = Compiler(db)
     
