@@ -78,31 +78,76 @@ class Compiler:
                 
     def parsing(self, query, parser):
         result = parser.parseString(query)
-        functionName = result[0].lower() + "Stm"
+        functionName = result[0].lower() + "Stmt"
         
         #One liner code to call the appropriate database function
         getattr(self, functionName)(result)
         
-    def selectStm(self,parsedText):
+    def selectStmt(self,parsedText):
         columns = parsedText[1]
         table = parsedText[3][0]
         condition = None
+        order_by = None
+        asc = False;
+        flag_join = False
+        flag_where = False
+        
         print(parsedText)
         
-        try:
-            lastToken = parsedText[4][0].lower() 
-            if lastToken == "where":
-                condition = "".join(parsedText[4][1])
-                print(condition)
-            elif lastToken == "inner":
-                pass
-                return None
-        except IndexError:
-            pass
+        if len(parsedText) > 4:
+            print("EIMAI MESA")
+            second_part = parsedText[4:]
+            print(second_part)
+            for text in second_part:
+                token = text[0].lower()
+                
+                if token == "inner":
+                    print("inner")
+                    flag_join = True
+                    table2 = text[2]
+                    condition_join = "".join(text[4:])
+                    print(condition_join)
+                elif token == "where":
+                    print("where")
+                    flag_where = True
+                    condition = "".join(text[1])
+                    print(condition)
+                elif token == "order":
+                    print("order")
+                    flag_where = True
+                    order_by =  text[2]
+                    print(order_by)
+                else:
+                    print("desc")
+                    flag_where = True
+                    if token == "a":
+                        asc = True
+                    print(asc)
+       
+        if flag_join:
+            if flag_where:
+                db.inner_join(table,table2,condition_join,return_object=True)._select_where(columns,condition,order_by,asc)
+            else:
+                db.inner_join(table,table2,condition_join)
+        else:
+            self.db.select(table,columns,condition,order_by,asc)
+
+#         try:
+#             lastToken = parsedText[4][0].lower() 
+#             if lastToken == "where":
+#                 condition = "".join(parsedText[4][1])
+#                 print(condition)
+#             elif lastToken == "inner":
+#                 pass
+#                 return None
+#         except IndexError:
+#             pass
         
-        self.db.select(table,columns,condition)
+#        self.db.select(table,columns,condition)
+
+
         
-    def updateStm(self,parsedText):
+    def updateStmt(self,parsedText):
         table = parsedText[1]
         set_value = parsedText[3][2]
         set_column = parsedText[3][0]
@@ -110,19 +155,19 @@ class Compiler:
         self.db.update(table, set_value, set_column, condition)
         
     #def insert(self, table_name, row, lock_load_save=True):
-    def insertStm(self,parsedText):
+    def insertStmt(self,parsedText):
         table = parsedText[2]
         row = parsedText[3]
         self.db.insert(table,row)
     
     #['DELETE', 'FROM', 'student', 'WHERE', ['name', '==', 'Zhang@']]
     #Delete From student WHERE name=="Zhang";
-    def deleteStm(self,parsedText):
+    def deleteStmt(self,parsedText):
         table = parsedText[2]
         condition = "".join(parsedText[4])
         self.db.delete(table,condition)
     
-    def createStm(self,parsedText):
+    def createStmt(self,parsedText):
         functionName = "create_" + parsedText[1].lower()
         getattr(self, functionName)(parsedText)
         
@@ -163,7 +208,7 @@ class Compiler:
         return unpacked_list
                     
     
-    def dropStm(self,parsedText):
+    def dropStmt(self,parsedText):
         functionName = "drop_" + parsedText[1].lower()
         getattr(self, functionName)(parsedText)
     

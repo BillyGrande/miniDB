@@ -17,7 +17,7 @@ keywords = {
     for k in """\
     SELECT FROM WHERE UPDATE SET INSERT INTO DELETE
     DROP TABLE CREATE INDEX DATABASE ON INNER JOIN
-    ORDER BY
+    ORDER BY ASC DESC
     """.split()
     }
 vars().update(keywords)
@@ -84,6 +84,7 @@ selectStmt <<= (
     + Optional(Group(INNER + JOIN + tableName + ON + joinCondition))("inner join")
     + Optional(Group(WHERE + whereCondition))("where")
     + Optional(Group(ORDER + BY + columnName))("order")
+    + Optional(ASC|DESC)
     )
 
 #UPDATE Customers SET name = 'Alfred' WHERE ID == 1;
@@ -189,52 +190,6 @@ if __name__ == "__main__":
         
         """
         )
-        
-        
-    selectSQL.runTests(
-        """\
-        
-        #update
-        UPDATE student SET name="Zhang@" where ID == 1
-
-        # multiple tables
-        SELECT * from XYZZY, ABC
-
-        # dotted table name
-        select * from SYS.XYZZY
-
-        Select A from Sys.dual
-
-        Select A,B,C from Sys.dual
-
-        Select A, B, C from Sys.dual, Table2
-
-        # FAIL - invalid SELECT keyword
-        Xelect A, B, C from Sys.dual
-
-        # FAIL - invalid FROM keyword
-        Select A, B, C frox Sys.dual
-
-        # FAIL - incomplete statement
-        Select
-
-        # FAIL - incomplete statement
-        Select * from
-
-        # FAIL - invalid column
-        Select &&& frox Sys.dual
-        
-        # Inner Join
-        Select BurgerCode.Mac, Names.Burgers, Price.Burgers from Mac INNER JOIN Burgers ON Names.Burgers == BurgerCode.Mac 
-        
-        #Select Complete
-        Select BurgerCode.Mac, Names.Burgers, Price.Burgers from Mac INNER JOIN Burgers ON Names.Burgers == BurgerCode.Mac WHERE Price.Burgers > 3
-        
-        #Select Order
-        Select BurgerCode.Mac, Names.Burgers, Price.Burgers from Mac INNER JOIN Burgers ON Names.Burgers == BurgerCode.Mac WHERE Price.Burgers > 3 ORDER BY BurgerCode
-        """
-        
-        )
     
     updateSQL.runTests(
         """\
@@ -287,3 +242,51 @@ if __name__ == "__main__":
         CREATE INDEX id_3 ON Stundet(ID)
         
         """)
+    
+    selectSQL.runTests(
+        """\
+        
+        #update
+        UPDATE student SET name="Zhang@" where ID == 1
+
+        # multiple tables
+        SELECT * from XYZZY, ABC
+
+        # dotted table name
+        select * from SYS.XYZZY
+
+        Select A from Sys.dual
+
+        Select A,B,C from Sys.dual
+
+        Select A, B, C from Sys.dual, Table2
+
+        # FAIL - invalid SELECT keyword
+        Xelect A, B, C from Sys.dual
+
+        # FAIL - invalid FROM keyword
+        Select A, B, C frox Sys.dual
+
+        # FAIL - incomplete statement
+        Select
+
+        # FAIL - incomplete statement
+        Select * from
+
+        # FAIL - invalid column
+        Select &&& frox Sys.dual
+        
+        # Inner Join
+        Select BurgerCode.Mac, Names.Burgers, Price.Burgers from Mac INNER JOIN Burgers ON Names.Burgers == BurgerCode.Mac 
+        
+        #Select Complete
+        Select BurgerCode.Mac, Names.Burgers, Price.Burgers from Mac INNER JOIN Burgers ON Names.Burgers == BurgerCode.Mac WHERE Price.Burgers > 3
+        
+        #Select Order
+        Select BurgerCode.Mac, Names.Burgers, Price.Burgers from Mac INNER JOIN Burgers ON Names.Burgers == BurgerCode.Mac WHERE Price.Burgers > 3 ORDER BY BurgerCode
+        
+        #Select Order
+        Select BurgerCode.Mac, Names.Burgers, Price.Burgers from Mac INNER JOIN Burgers ON Names.Burgers == BurgerCode.Mac WHERE Price.Burgers > 3 ORDER BY BurgerCode ASC
+        """
+        
+        )
