@@ -92,37 +92,26 @@ class Compiler:
         flag_join = False
         flag_where = False
         
-        print(parsedText)
         
         if len(parsedText) > 4:
-            print("EIMAI MESA")
             second_part = parsedText[4:]
-            print(second_part)
             for text in second_part:
                 token = text[0].lower()
                 
                 if token == "inner":
-                    print("inner")
                     flag_join = True
                     table2 = text[2]
                     condition_join = "".join(text[4:])
-                    print(condition_join)
                 elif token == "where":
-                    print("where")
                     flag_where = True
                     condition = "".join(text[1])
-                    print(condition)
                 elif token == "order":
-                    print("order")
                     flag_where = True
                     order_by =  text[2]
-                    print(order_by)
                 else:
-                    print("desc")
                     flag_where = True
                     if token == "a":
                         asc = True
-                    print(asc)
        
         if flag_join:
             if flag_where:
@@ -204,7 +193,6 @@ class Compiler:
         
         unpacked_list.append(column_names)
         unpacked_list.append(column_types)
-        print(unpacked_list)
         return unpacked_list
                     
     
@@ -214,8 +202,7 @@ class Compiler:
     
     def drop_database(self,parsedText):
         database = parsedText[2]
-        tmp = db
-        del tmp
+        pass
     
     def drop_table(self,parsedText):
         table = parsedText[2]
