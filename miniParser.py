@@ -31,7 +31,8 @@ columnNameList = Group(delimitedList(columnName))
 tableName = delimitedList(ident, ".", combine=True).setName("table name")
 tableNameList = Group(delimitedList(tableName))
 
-
+digits = Word(nums).setName("numeric digits")
+real_num = Combine(digits + '.' + digits)
 dataTypes = oneOf("str int float complex")
 binop = oneOf("< <= == >= >")
 realNum = pyparsing_common.real()
@@ -46,7 +47,7 @@ columnRval = (
     )
 
 columnRval = (
-    Word(alphanums) | columnName | QuotedString('"')
+    digits| real_num | columnName | QuotedString('"')
     )
 
 #for update
@@ -55,7 +56,7 @@ setColumnVal = (
     )
 
 setColumnVal = (
-    Word(alphanums) | QuotedString('"')
+    digits | real_num | QuotedString('"')
     )
 
 #for select

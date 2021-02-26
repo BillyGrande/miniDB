@@ -115,7 +115,7 @@ class Compiler:
        
         if flag_join:
             if flag_where:
-                db.inner_join(table,table2,condition_join,return_object=True)._select_where(columns,condition,order_by,asc)
+                db.inner_join(table,table2,condition_join,return_object=True)._select_where(columns,condition,order_by,asc).show()
             else:
                 db.inner_join(table,table2,condition_join)
         else:
