@@ -1,36 +1,15 @@
 import sys,os
 from pyparsing import *
+ParserElement.enablePackrat()
 from database import Database
+from miniParser import miniParsers
 import contextlib
 
 #Suppress print statements of Small Relations database when loading
 with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
-    from miniParser import miniParsers
     from smallRelationsInsertFile import db
   
-#A general parser for all accepted characters
-sqltext = Word(alphanums + "_$, -*.()<=>\"\'").setName("text")
-parser = delimitedList(sqltext, ";",)
-
-#The heart of compiler, function exits, only when we the last char is ";"
-def sqlInput(query):
-    try:
-        text = input()
-        try:
-            if text[-1] == ";":
-                query = query + text
-                sql = parser.parseString(query)
-                return sql
-            else:
-                text = query + text + " "
-                return sqlInput(text)
-        except ParseException:
-            sqlInput("")
-    except IndexError:
-        print("\n")
-        sqlInput("")
-        
-        
+            
 print("Welcome to Mini Compiler. A sql-like compiler for miniDB framework made from Python!")
 
 class Compiler:
@@ -42,6 +21,10 @@ class Compiler:
         "complex": complex
         }
     
+    #A general parser for all accepted characters
+    sqltext = Word(alphanums + "_$, -*.()<=>\"\'").setName("text")
+    parser = delimitedList(sqltext, ";")
+    
     def __init__(self, database=None):
         self.db = database
         self.parsedText = []
@@ -50,17 +33,40 @@ class Compiler:
         print("Compiler is activated!")
         self.screen()
     
+    #The heart of compiler, function exits, only when we the last char is ";"
+    @classmethod
+    def sqlInput(cls, query):
+        try:
+            text = input()
+            try:
+                if text[-1] == ";":
+                    query = query + text
+                    sql = Compiler.parser.parseString(query)
+                    return sql
+                else:
+                    text = query + text + " "
+                    return Compiler.sqlInput(text)
+            except ParseException:
+                Compiler.sqlInput("")
+        except IndexError:
+            print("\n")
+            Compiler.sqlInput("")
+    
     def screen(self):
-        self.parsedText.extend(sqlInput(""))
+        self.parsedText.extend(Compiler.sqlInput(""))
         self.sqlText()
+        
+    def reload(self):
+        self.parsedText = []
+        self.sql = []
+        print("\n")
+        self.screen()
     
     def sqlText(self):
         self.sql.extend(self.parsedText)
         print(self.sql)
         self.typeOfQuery()
-    
-    def validator(self, query):
-        pass
+        self.reload()
     
     def typeOfQuery(self):
         for query in self.sql:
@@ -70,10 +76,16 @@ class Compiler:
                 parser = miniParsers[type]
                 self.parsing(query,parser)
             except KeyError as err:
-                print("'" + initialStmt + "' is not a valid initial token {0}".format(err))
-            except:
+                print("{0} is not valid".format(err))
+            except ParseException as err:
+                print("PARSING ERROR: {0}".format(err))
+            except ValueError as err:
+                print("{0}".format(err))
+            except SystemExit:
+                sys.exit();
+            except: 
                 print("Unexpected error:", sys.exc_info()[0])
-                raise
+                
                 
                 
     def parsing(self, query, parser):
@@ -121,20 +133,6 @@ class Compiler:
         else:
             self.db.select(table,columns,condition,order_by,asc)
 
-#         try:
-#             lastToken = parsedText[4][0].lower() 
-#             if lastToken == "where":
-#                 condition = "".join(parsedText[4][1])
-#                 print(condition)
-#             elif lastToken == "inner":
-#                 pass
-#                 return None
-#         except IndexError:
-#             pass
-        
-#        self.db.select(table,columns,condition)
-
-
         
     def updateStmt(self,parsedText):
         table = parsedText[1]
@@ -143,14 +141,11 @@ class Compiler:
         condition = "".join(parsedText[5])
         self.db.update(table, set_value, set_column, condition)
         
-    #def insert(self, table_name, row, lock_load_save=True):
     def insertStmt(self,parsedText):
         table = parsedText[2]
         row = parsedText[3]
         self.db.insert(table,row)
     
-    #['DELETE', 'FROM', 'student', 'WHERE', ['name', '==', 'Zhang@']]
-    #Delete From student WHERE name=="Zhang";
     def deleteStmt(self,parsedText):
         table = parsedText[2]
         condition = "".join(parsedText[4])
@@ -162,7 +157,7 @@ class Compiler:
         
     def create_database(self,parsedText):
         name = parsedText[2]
-        self.db = Database(name)
+        self.db = Database(name,load=False)
     
     def create_index(self,parsedText):
         index_name = parsedText[2]
@@ -176,9 +171,7 @@ class Compiler:
             column_names = unpacked_list[0]
             column_types = unpacked_list[1]
             self.db.create_table(table_name,column_names,column_types)
-        
-        
-    
+            
     def _unpack_list(self,columns):
         unpacked_list = []
         column_names = []
@@ -195,7 +188,6 @@ class Compiler:
         unpacked_list.append(column_types)
         return unpacked_list
                     
-    
     def dropStmt(self,parsedText):
         functionName = "drop_" + parsedText[1].lower()
         getattr(self, functionName)(parsedText)
@@ -210,11 +202,20 @@ class Compiler:
     
     def drop_index(self,parsedText):
         pass
+    
+    def loadStmt(self,parsedText):
+        name = parsedText[2]
+        print(name)
+        self.db = Database(name, load=True)
+    
+    def exitStmt(self,parsedText):
+        raise SystemExit
+    
 
 if __name__ == "__main__":
     
-    #db.drop_table("KingKong")
-    comp1 = Compiler(db)
-    comp = Compiler(db)
-    comp2 = Compiler(db)
-    
+    if str(sys.argv[1]) == "smdb":
+        comp = Compiler(db)
+    else:
+        comp = Compiler()
+        
