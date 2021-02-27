@@ -193,8 +193,8 @@ class Compiler:
         getattr(self, functionName)(parsedText)
     
     def drop_database(self,parsedText):
-        database = parsedText[2]
-        pass
+        self.db.drop_db();
+        self.db = None;
     
     def drop_table(self,parsedText):
         table = parsedText[2]
@@ -214,8 +214,11 @@ class Compiler:
 
 if __name__ == "__main__":
     
-    if str(sys.argv[1]) == "smdb":
-        comp = Compiler(db)
+    try:
+        if str(sys.argv[1]) == "smdb":
+            comp = Compiler(db)
+    except SystemExit:
+        sys.exit();
     else:
         comp = Compiler()
         
