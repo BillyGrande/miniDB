@@ -1,4 +1,4 @@
-#+TITLE: Mini Documention
+#+TITLE: Mini Documentation
 
 * Πρόγραμμα
 O compiler αποτελείται από δύο αρχεία, το αρχείο miniParser.py και το αρχείο miniCompiler.py. Στο miniParser ορίζουμε την γραμματική της sql και στο miniCompiler τις λειτουργίες του compiler.
