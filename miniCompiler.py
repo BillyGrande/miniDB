@@ -10,7 +10,7 @@ with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
     from smallRelationsInsertFile import db
   
             
-print("Welcome to Mini Compiler. A sql-like compiler for miniDB framework made from Python!")
+print("Welcome to Mini Compiler. A sql-like compiler for miniDB framework made using Python!")
 
 class Compiler:
     
@@ -217,8 +217,10 @@ if __name__ == "__main__":
     try:
         if str(sys.argv[1]) == "smdb":
             comp = Compiler(db)
+        else:
+            comp = Compiler()
     except SystemExit:
         sys.exit();
-    else:
+    except IndexError:
         comp = Compiler()
         
